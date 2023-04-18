@@ -1,37 +1,26 @@
 package com.example.newaddimage
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.view.LayoutInflaterCompat
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.newaddimage.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     private var adapter = AdapterImages()
-    private val array = listOf(
-        R.drawable.img0,
-        R.drawable.img1,
-        R.drawable.img2,
-        R.drawable.img3,
-        R.drawable.img4,
-        R.drawable.img5,
-        R.drawable.img6,
-        R.drawable.img7,
-        R.drawable.img8,
-        R.drawable.img9,
-        R.drawable.img10,
-        R.drawable.img11,
-        R.drawable.img12,
-        R.drawable.img13,
-        R.drawable.img14,
-    )
-    private var count = 0
+    var edLanitVar: ActivityResultLauncher<Intent>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        edLanitVar = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                adapter.add(it.data?.getSerializableExtra("image") as Images)
+            }
+        }
         init()
     }
 
@@ -40,14 +29,11 @@ class MainActivity : AppCompatActivity() {
             rcView.layoutManager = GridLayoutManager(this@MainActivity, 1)
             rcView.adapter = adapter
             btnId.setOnClickListener {
-                if (count > 14) count = 0
-                val image = Images(array[count], "Номер фото: $count")
-                adapter.add(image)
-                count++
+                edLanitVar?.launch(Intent(this@MainActivity, EdImages::class.java))
             }
 
             btnRemove.setOnClickListener {
-                if (count != 0) adapter.remove()
+                adapter.remove()
             }
         }
     }
